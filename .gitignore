@@ -1,3 +1,5 @@
 /.vscode
 /bin
 /obj
+*.xml
+.vs/MailAttachmentsDownloader/xs/project-cache/MailAttachmentsDownloader-Debug.json

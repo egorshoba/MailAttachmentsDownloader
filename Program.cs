@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using MailKit.Net.Imap;
-using MimeKit;
 using MailKit;
+using MailKit.Net.Imap;
 using MailKit.Search;
 using MailKit.Security;
+using MimeKit;
 
 var configText = File.ReadAllText("appsettings.json");
 System.Console.WriteLine(configText);
@@ -23,22 +23,30 @@ using (var client = new ImapClient())
     var uids = folder.Search(SearchQuery.All);
 
     var items = folder.Fetch(uids, MessageSummaryItems.UniqueId | MessageSummaryItems.BodyStructure)
-    .OrderBy(m=>m.UniqueId);
+    .OrderBy(m => m.UniqueId);
     int i = 0;
     foreach (var item in items)
     {
         foreach (var attachment in item.BodyParts)
         {
-            var entity = folder.GetBodyPart(item.UniqueId, attachment);
-            var part = (MimePart)entity;
-            if (part.ContentType.MimeType is null 
-            || !part.ContentType.MimeType.Contains("image"))
-                continue;
-            System.Console.WriteLine(i);
-            var date = item.Date.ToString();
-            using (var stream = File.Create("images/" + i + ".jpg"))
-                part.Content.DecodeTo(stream);
-            i++;
+            try
+            {
+
+                var entity = folder.GetBodyPart(item.UniqueId, attachment);
+                var part = (MimePart)entity;
+                if (part.ContentType.MimeType is null
+                || !part.ContentType.MimeType.Contains("image"))
+                    continue;
+                System.Console.WriteLine(i);
+                var date = item.Date.ToString();
+                using (var stream = File.Create("images/" + i + ".jpg"))
+                    part.Content.DecodeTo(stream);
+                i++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
     client.Disconnect(true);
